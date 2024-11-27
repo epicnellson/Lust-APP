@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
-import 'student_management_screen.dart'; // Import the Student Management screen
+import 'result_entry.dart';
+import 'student_management.dart';
+import 'view_report.dart';
 
 class AdminDashboard extends StatefulWidget {
   @override
@@ -11,6 +13,13 @@ class AdminDashboard extends StatefulWidget {
 class _AdminDashboardState extends State<AdminDashboard> {
   File? _profileImage;
 
+  // Placeholder list of students
+  List<Map<String, dynamic>> students = [
+    {'student_id': 1, 'name': 'John Doe'},
+    {'student_id': 2, 'name': 'Jane Smith'},
+  ];
+
+  // Function to pick an image for the profile
   Future<void> _pickImage() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
@@ -20,27 +29,6 @@ class _AdminDashboardState extends State<AdminDashboard> {
         _profileImage = File(pickedFile.path);
       });
     }
-  }
-
-  void _showProfileOptions(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      builder: (BuildContext context) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            ListTile(
-              leading: Icon(Icons.upload),
-              title: Text('Upload New Profile'),
-              onTap: () {
-                _pickImage();
-                Navigator.pop(context);
-              },
-            ),
-          ],
-        );
-      },
-    );
   }
 
   @override
@@ -54,13 +42,20 @@ class _AdminDashboardState extends State<AdminDashboard> {
               radius: 20,
               backgroundImage:
                   _profileImage != null ? FileImage(_profileImage!) : null,
-              child:
-                  _profileImage == null ? Icon(Icons.person, size: 20) : null,
+              child: _profileImage == null
+                  ? Icon(Icons.person, size: 20, color: Colors.white)
+                  : null,
             ),
             SizedBox(width: 10),
             Text('Hi Admin! Welcome'),
           ],
         ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.edit),
+            onPressed: _pickImage,
+          ),
+        ],
       ),
       body: Center(
         child: Container(
@@ -80,14 +75,44 @@ class _AdminDashboardState extends State<AdminDashboard> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _buildButton(context, 'Result Entry'),
+              _buildButton(context, 'Result Entry', () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ResultEntryScreen()),
+                );
+              }),
               SizedBox(height: 20),
-              _buildButton(context, 'Student Management',
-                  navigateToStudentManagement: true),
+              _buildButton(context, 'Student Management', () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => StudentManagementScreen()),
+                );
+              }),
               SizedBox(height: 20),
-              _buildButton(context, 'View Reports'),
+              _buildButton(context, 'View Reports', () {
+                if (students.isNotEmpty) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ViewReportPage(
+                        studentId: students.first['student_id'],
+                      ),
+                    ),
+                  );
+                } else {
+                  // Show a message if there are no students
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('No students available to view reports!'),
+                    ),
+                  );
+                }
+              }),
               SizedBox(height: 20),
-              _buildButton(context, 'Logout', isLogout: true),
+              _buildButton(context, 'Logout', () {
+                Navigator.pop(context);
+              }, isLogout: true),
             ],
           ),
         ),
@@ -95,23 +120,14 @@ class _AdminDashboardState extends State<AdminDashboard> {
     );
   }
 
-  Widget _buildButton(BuildContext context, String label,
-      {bool isLogout = false, bool navigateToStudentManagement = false}) {
+  // Helper function to build buttons
+  Widget _buildButton(
+      BuildContext context, String label, VoidCallback onPressed,
+      {bool isLogout = false}) {
     return ElevatedButton(
-      onPressed: () {
-        if (isLogout) {
-          Navigator.pop(context);
-        } else if (navigateToStudentManagement) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => StudentManagementScreen()),
-          );
-        } else {
-          // Add other button actions here if needed
-        }
-      },
+      onPressed: onPressed,
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.black,
+        backgroundColor: isLogout ? Colors.red : Colors.black,
         padding: EdgeInsets.symmetric(vertical: 15, horizontal: 30),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(30),

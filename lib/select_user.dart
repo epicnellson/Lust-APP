@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'student_login.dart'; // Import student login page
-import 'admin_login.dart'; // Import admin login page
+import 'student_login.dart'; // Ensure this file exists and has StudentLoginPage
+import 'admin_login.dart'; // Ensure this file exists and has AdminLoginPage
 
 class SelectUserPage extends StatelessWidget {
   @override
@@ -14,15 +14,21 @@ class SelectUserPage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            // Ensure this image exists and is added in pubspec.yaml
             Image.asset(
-              'assets/images/logo.png', // Ensure image is referenced in pubspec.yaml
+              'assets/images/logo.png',
               width: 150,
+              errorBuilder: (context, error, stackTrace) => Icon(
+                Icons.image_not_supported,
+                size: 150,
+                color: Colors.grey,
+              ),
             ),
             SizedBox(height: 30),
             _buildButton(
               context: context,
               label: 'Student',
-              color: Colors.blue, // Color for Student button
+              color: Colors.blue,
               onPressed: () {
                 Navigator.push(
                   context,
@@ -34,7 +40,7 @@ class SelectUserPage extends StatelessWidget {
             _buildButton(
               context: context,
               label: 'Admin',
-              color: Colors.red, // Color for Admin button
+              color: Colors.red,
               onPressed: () {
                 Navigator.push(
                   context,
@@ -58,7 +64,7 @@ class SelectUserPage extends StatelessWidget {
       style: ElevatedButton.styleFrom(
         backgroundColor: color,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(30), // Rounded button
+          borderRadius: BorderRadius.circular(30),
         ),
         padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
         textStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -69,7 +75,6 @@ class SelectUserPage extends StatelessWidget {
     );
   }
 }
-
 
 
 

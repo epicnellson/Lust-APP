@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:sqflite/sqflite.dart';
 import 'student_dashboard.dart';
+import 'database_helper.dart';
 
 class StudentLoginPage extends StatefulWidget {
   @override
@@ -9,35 +11,30 @@ class StudentLoginPage extends StatefulWidget {
 class _StudentLoginPageState extends State<StudentLoginPage> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _idController = TextEditingController();
-
-  // Updated valid credentials list
-  final Map<String, String> validCredentials = {
-    'Emmanuel Nelson': '905004293',
-    'Sarah Okikeh': '905001212',
-    'John Cookson': '905001111',
-    'John Nelson': '9050002222',
-    'Samuel Hill': '905003333',
-    'Luis Scott': '905004444',
-    'Vandy Lee': '905005555',
-    'Abu Turay': '905006666',
-  };
-
   String errorMessage = '';
 
-  void _login() {
+  void _login() async {
     String name = _nameController.text.trim();
     String id = _idController.text.trim();
 
-    if (validCredentials[name] == id) {
-      // Navigate to Student Dashboard
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => StudentDashboard(name: name)),
-      );
-    } else {
-      // Display error message if credentials don't match
+    try {
+      final student = await DatabaseHelper.instance.getStudentByUsername(name);
+      if (student != null && student['student_id'].toString() == id) {
+        // Navigate to the Student Dashboard
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => StudentDashboard(studentName: name),
+          ),
+        );
+      } else {
+        setState(() {
+          errorMessage = 'Invalid name or ID. Please try again.';
+        });
+      }
+    } catch (e) {
       setState(() {
-        errorMessage = 'Invalid name or ID. Please try again.';
+        errorMessage = 'An error occurred. Please try again.';
       });
     }
   }
@@ -57,7 +54,7 @@ class _StudentLoginPageState extends State<StudentLoginPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Image.asset(
-                  'assets/images/logo.png', // Make sure this path is correct in pubspec.yaml
+                  'assets/images/logo.png',
                   width: 150,
                 ),
                 SizedBox(height: 30),
@@ -87,7 +84,6 @@ class _StudentLoginPageState extends State<StudentLoginPage> {
                       borderSide: BorderSide.none,
                     ),
                   ),
-                  obscureText: true, // Mask the ID input
                   keyboardType: TextInputType.number,
                 ),
                 SizedBox(height: 10),
@@ -118,72 +114,3 @@ class _StudentLoginPageState extends State<StudentLoginPage> {
     );
   }
 }
-
-// import 'package:flutter/material.dart';
-// import 'select_user.dart';
-
-// class StudentLoginPage extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text('Student Login'),
-//         backgroundColor: Colors.black,
-//       ),
-//       body: Padding(
-//         padding: const EdgeInsets.all(16.0),
-//         child: Column(
-//           mainAxisAlignment: MainAxisAlignment.center,
-//           children: [
-//             Image.asset(
-//               'assets/images/logo.png', // Make sure this path is correct in pubspec.yaml
-//               width: 150,
-//             ),
-//             SizedBox(height: 30),
-//             TextField(
-//               decoration: InputDecoration(
-//                 labelText: 'Username',
-//                 labelStyle: TextStyle(color: Colors.black),
-//                 filled: true,
-//                 fillColor: Colors.black12,
-//                 border: OutlineInputBorder(
-//                   borderRadius: BorderRadius.circular(30),
-//                   borderSide: BorderSide.none,
-//                 ),
-//               ),
-//             ),
-//             SizedBox(height: 20),
-//             TextField(
-//               decoration: InputDecoration(
-//                 labelText: 'ID',
-//                 labelStyle: TextStyle(color: Colors.black),
-//                 filled: true,
-//                 fillColor: Colors.black12,
-//                 border: OutlineInputBorder(
-//                   borderRadius: BorderRadius.circular(30),
-//                   borderSide: BorderSide.none,
-//                 ),
-//               ),
-//               keyboardType: TextInputType.number,
-//             ),
-//             SizedBox(height: 30),
-//             ElevatedButton(
-//               style: ElevatedButton.styleFrom(
-//                 backgroundColor: Colors.black,
-//                 shape: RoundedRectangleBorder(
-//                   borderRadius: BorderRadius.circular(30),
-//                 ),
-//                 padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-//                 textStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-//               ),
-//               onPressed: () {
-//                 // Add login logic here
-//               },
-//               child: Text('Login'),
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
